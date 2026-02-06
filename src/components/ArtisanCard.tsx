@@ -13,26 +13,10 @@ export function ArtisanCard({ artisan, onContact }: ArtisanCardProps) {
 
   const handleWhatsApp = () => {
     onContact(artisan, "whatsapp");
-    // Auto-include location in WhatsApp message
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const { latitude, longitude } = position.coords;
-        const mapLink = `https://maps.google.com/?q=${latitude},${longitude}`;
-        const message = encodeURIComponent(
-          `Bonjour ${artisan.name}, j'ai besoin de vos services. Ma position: ${mapLink}`
-        );
-        window.open(`https://wa.me/${artisan.whatsapp.replace('+', '')}?text=${message}`, '_blank');
-      }, () => {
-        // Fallback without location
-        const message = encodeURIComponent(`Bonjour ${artisan.name}, j'ai besoin de vos services.`);
-        window.open(`https://wa.me/${artisan.whatsapp.replace('+', '')}?text=${message}`, '_blank');
-      });
-    }
   };
 
   const handleCall = () => {
     onContact(artisan, "call");
-    window.open(`tel:${artisan.phone}`, '_self');
   };
 
   return (

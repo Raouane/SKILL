@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { CitySelector } from "@/components/CitySelector";
 import { CategoryGrid } from "@/components/CategoryGrid";
 import { ArtisanList } from "@/components/ArtisanList";
+import { ContactFormDialog } from "@/components/ContactFormDialog";
 import { Artisan } from "@/lib/data";
 import { toast } from "sonner";
 
@@ -13,6 +14,11 @@ const Index = () => {
   const [view, setView] = useState<View>("home");
   const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  
+  // Contact dialog state
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [selectedArtisan, setSelectedArtisan] = useState<Artisan | null>(null);
+  const [contactMethod, setContactMethod] = useState<"call" | "whatsapp" | null>(null);
 
   // Load saved city from localStorage
   useEffect(() => {
@@ -43,8 +49,16 @@ const Index = () => {
   };
 
   const handleContact = (artisan: Artisan, method: "call" | "whatsapp") => {
-    // In a real app, this would trigger the 1 DNT debit logic
-    toast.success(`Contact avec ${artisan.name} via ${method === "call" ? "téléphone" : "WhatsApp"}`);
+    // Open the contact form dialog
+    setSelectedArtisan(artisan);
+    setContactMethod(method);
+    setContactDialogOpen(true);
+  };
+
+  const handleCloseContactDialog = () => {
+    setContactDialogOpen(false);
+    setSelectedArtisan(null);
+    setContactMethod(null);
   };
 
   return (
@@ -91,6 +105,14 @@ const Index = () => {
       </main>
 
       <Footer />
+
+      {/* Contact Form Dialog */}
+      <ContactFormDialog
+        artisan={selectedArtisan}
+        isOpen={contactDialogOpen}
+        onClose={handleCloseContactDialog}
+        contactMethod={contactMethod}
+      />
     </div>
   );
 };
