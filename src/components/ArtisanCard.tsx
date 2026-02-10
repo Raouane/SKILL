@@ -1,4 +1,4 @@
-import { Phone, MessageCircle, Star } from "lucide-react";
+import { Phone, MessageCircle, Star, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Artisan, categories, cities } from "@/lib/data";
 
@@ -48,11 +48,21 @@ export function ArtisanCard({ artisan, onContact }: ArtisanCardProps) {
           </div>
         </div>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1 bg-secondary px-2 py-1 rounded-lg">
-          <Star className="w-4 h-4 text-primary fill-primary" />
-          <span className="text-sm font-semibold text-foreground">{artisan.rating}</span>
-          <span className="text-xs text-muted-foreground">({artisan.reviewCount})</span>
+        {/* Rating + Balance */}
+        <div className="flex flex-col items-end gap-1.5">
+          <div className="flex items-center gap-1 bg-secondary px-2 py-1 rounded-lg">
+            <Star className="w-4 h-4 text-primary fill-primary" />
+            <span className="text-sm font-semibold text-foreground">{artisan.rating}</span>
+            <span className="text-xs text-muted-foreground">({artisan.reviewCount})</span>
+          </div>
+          <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold ${
+            artisan.balance <= 5 
+              ? "bg-destructive/10 text-destructive" 
+              : "bg-accent/10 text-accent"
+          }`}>
+            <Coins className="w-3.5 h-3.5" />
+            {artisan.balance} DNT
+          </div>
         </div>
       </div>
 

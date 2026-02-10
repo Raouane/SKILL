@@ -47,7 +47,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.8,
     reviewCount: 42,
     isOnline: true,
-    balance: 25,
+    balance: 10,
   },
   {
     id: "2",
@@ -59,7 +59,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.5,
     reviewCount: 28,
     isOnline: true,
-    balance: 15,
+    balance: 10,
   },
   // Tataouine - Électricité
   {
@@ -72,7 +72,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.9,
     reviewCount: 67,
     isOnline: true,
-    balance: 40,
+    balance: 10,
   },
   {
     id: "4",
@@ -84,7 +84,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.6,
     reviewCount: 33,
     isOnline: true,
-    balance: 20,
+    balance: 10,
   },
   // Tataouine - Peinture
   {
@@ -97,7 +97,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.6,
     reviewCount: 35,
     isOnline: true,
-    balance: 18,
+    balance: 10,
   },
   {
     id: "6",
@@ -109,7 +109,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.4,
     reviewCount: 22,
     isOnline: true,
-    balance: 12,
+    balance: 10,
   },
   // Tataouine - Climatisation
   {
@@ -122,7 +122,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.7,
     reviewCount: 51,
     isOnline: true,
-    balance: 30,
+    balance: 10,
   },
   // Tataouine - Maçonnerie
   {
@@ -135,7 +135,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.8,
     reviewCount: 45,
     isOnline: true,
-    balance: 35,
+    balance: 10,
   },
   {
     id: "9",
@@ -147,7 +147,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.5,
     reviewCount: 29,
     isOnline: true,
-    balance: 22,
+    balance: 10,
   },
   // Tataouine - Serrurerie
   {
@@ -160,7 +160,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.9,
     reviewCount: 58,
     isOnline: true,
-    balance: 28,
+    balance: 10,
   },
   // Tataouine - Menuiserie
   {
@@ -173,7 +173,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.7,
     reviewCount: 39,
     isOnline: true,
-    balance: 25,
+    balance: 10,
   },
   // Tataouine - Jardinage
   {
@@ -199,7 +199,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.6,
     reviewCount: 31,
     isOnline: true,
-    balance: 20,
+    balance: 10,
   },
   // Tataouine - Réparation
   {
@@ -212,7 +212,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.5,
     reviewCount: 27,
     isOnline: true,
-    balance: 15,
+    balance: 10,
   },
   // Gabès - Plomberie
   {
@@ -225,7 +225,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.7,
     reviewCount: 44,
     isOnline: true,
-    balance: 30,
+    balance: 10,
   },
   // Gabès - Électricité
   {
@@ -238,7 +238,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.8,
     reviewCount: 52,
     isOnline: true,
-    balance: 25,
+    balance: 10,
   },
   // Médenine - Plomberie
   {
@@ -251,7 +251,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.6,
     reviewCount: 36,
     isOnline: true,
-    balance: 22,
+    balance: 10,
   },
   // Sfax - Électricité
   {
@@ -264,7 +264,7 @@ export const mockArtisans: Artisan[] = [
     rating: 4.9,
     reviewCount: 71,
     isOnline: true,
-    balance: 45,
+    balance: 10,
   },
 ];
 
