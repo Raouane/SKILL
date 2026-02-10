@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Wrench } from "lucide-react";
+import { Wrench, Shield } from "lucide-react";
 
 export function Footer() {
   return (
@@ -7,13 +7,22 @@ export function Footer() {
       <div className="container py-6">
         <div className="flex flex-col items-center gap-4">
           {/* Pro access button */}
-          <Link 
-            to="/pro"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-secondary hover:bg-secondary/80 rounded-xl transition-colors font-semibold text-secondary-foreground"
-          >
-            <Wrench className="w-5 h-5" />
-            Espace Pro - Artisans
-          </Link>
+          <div className="flex gap-3">
+            <Link 
+              to="/pro"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-secondary hover:bg-secondary/80 rounded-xl transition-colors font-semibold text-secondary-foreground"
+            >
+              <Wrench className="w-5 h-5" />
+              Espace Pro
+            </Link>
+            <Link 
+              to="/admin"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-secondary hover:bg-secondary/80 rounded-xl transition-colors font-semibold text-secondary-foreground"
+            >
+              <Shield className="w-5 h-5" />
+              Admin
+            </Link>
+          </div>
 
           {/* Legal links */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
