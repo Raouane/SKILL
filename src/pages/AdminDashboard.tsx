@@ -1,16 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, ArrowLeft, Phone, MessageCircle, Trash2, Search, Users, PhoneCall } from "lucide-react";
+import { Shield, ArrowLeft, Phone, MessageCircle, Trash2, Search, Users, PhoneCall, MapPin, Calendar, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { getContactLog, clearContactLog, ContactLogEntry } from "@/lib/contactLog";
 import { categories, cities } from "@/lib/data";
@@ -166,7 +158,7 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        {/* Table */}
+        {/* Cards */}
         {filteredLogs.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -174,59 +166,66 @@ const AdminDashboard = () => {
             <p className="text-sm">Les mises en relation apparaîtront ici</p>
           </div>
         ) : (
-          <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Artisan</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Ville</TableHead>
-                  <TableHead>Méthode</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLogs.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell className="whitespace-nowrap text-xs">
-                      {format(new Date(log.date), "dd/MM/yy HH:mm", { locale: fr })}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium text-sm">{log.clientName}</p>
-                        <p className="text-xs text-muted-foreground">{log.clientPhone}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium text-sm">{log.artisanName}</p>
-                        <p className="text-xs text-muted-foreground">{log.artisanPhone}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="text-xs">
-                        {getCategoryName(log.category)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{getCityName(log.city)}</TableCell>
-                    <TableCell>
-                      {log.method === "whatsapp" ? (
-                        <Badge className="bg-[hsl(var(--whatsapp))] text-[hsl(var(--whatsapp-foreground))] text-xs">
-                          <MessageCircle className="w-3 h-3 mr-1" />
-                          WA
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-primary text-primary-foreground text-xs">
-                          <Phone className="w-3 h-3 mr-1" />
-                          Tel
-                        </Badge>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="space-y-3">
+            {filteredLogs.map((log) => (
+              <div key={log.id} className="bg-card rounded-xl border border-border shadow-card p-4 space-y-3">
+                {/* Date + Method badge */}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {format(new Date(log.date), "dd/MM/yy à HH:mm", { locale: fr })}
+                  </span>
+                  {log.method === "whatsapp" ? (
+                    <Badge className="bg-[hsl(var(--whatsapp))] text-[hsl(var(--whatsapp-foreground))] text-xs">
+                      <MessageCircle className="w-3 h-3 mr-1" />
+                      WhatsApp
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-primary text-primary-foreground text-xs">
+                      <Phone className="w-3 h-3 mr-1" />
+                      Appel
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Client → Artisan */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 bg-secondary/50 rounded-lg p-3">
+                    <p className="text-xs text-muted-foreground mb-0.5">Client</p>
+                    <p className="font-semibold text-sm">{log.clientName}</p>
+                    <p className="text-xs text-muted-foreground">{log.clientPhone}</p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <div className="flex-1 bg-secondary/50 rounded-lg p-3">
+                    <p className="text-xs text-muted-foreground mb-0.5">Artisan</p>
+                    <p className="font-semibold text-sm">{log.artisanName}</p>
+                    <p className="text-xs text-muted-foreground">{log.artisanPhone}</p>
+                  </div>
+                </div>
+
+                {/* Category + City + Location */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="secondary" className="text-xs">
+                    {getCategoryName(log.category)}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    <MapPin className="w-3 h-3 mr-1" />
+                    {getCityName(log.city)}
+                  </Badge>
+                  {log.clientLocation && (
+                    <a
+                      href={log.clientLocation}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary hover:underline flex items-center gap-1"
+                    >
+                      <MapPin className="w-3 h-3" />
+                      Voir position
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </main>
