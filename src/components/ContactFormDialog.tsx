@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Artisan } from "@/lib/data";
+import { addContactLog } from "@/lib/contactLog";
 
 interface ContactFormDialogProps {
   artisan: Artisan | null;
@@ -63,13 +64,25 @@ export function ContactFormDialog({
     const cleanPhone = clientPhone.replace(/\s/g, "");
     const fullPhone = `+216${cleanPhone}`;
     
+    // Log the contact
+    const logEntry = {
+      clientName: clientName.trim(),
+      clientPhone: fullPhone,
+      artisanId: artisan.id,
+      artisanName: artisan.name,
+      artisanPhone: artisan.phone,
+      category: artisan.category,
+      city: artisan.city,
+      method: contactMethod!,
+    };
+
     if (contactMethod === "whatsapp") {
-      // Get location and open WhatsApp
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
             const mapLink = `https://maps.google.com/?q=${latitude},${longitude}`;
+            addContactLog({ ...logEntry, clientLocation: mapLink });
             const message = encodeURIComponent(
               `Bonjour ${artisan.name}, je suis ${clientName.trim()} (${fullPhone}). J'ai besoin de vos services. Ma position: ${mapLink}`
             );
@@ -80,7 +93,7 @@ export function ContactFormDialog({
             resetAndClose();
           },
           () => {
-            // Fallback without location
+            addContactLog(logEntry);
             const message = encodeURIComponent(
               `Bonjour ${artisan.name}, je suis ${clientName.trim()} (${fullPhone}). J'ai besoin de vos services.`
             );
@@ -92,6 +105,7 @@ export function ContactFormDialog({
           }
         );
       } else {
+        addContactLog(logEntry);
         const message = encodeURIComponent(
           `Bonjour ${artisan.name}, je suis ${clientName.trim()} (${fullPhone}). J'ai besoin de vos services.`
         );
@@ -102,6 +116,7 @@ export function ContactFormDialog({
         resetAndClose();
       }
     } else if (contactMethod === "call") {
+      addContactLog(logEntry);
       window.open(`tel:${artisan.phone}`, '_self');
       resetAndClose();
     }
