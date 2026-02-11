@@ -40,10 +40,7 @@ export function CitySelector({ selectedCity, onCityChange }: CitySelectorProps) 
               value={city.id}
               className="py-3 px-4 cursor-pointer rounded-lg focus:bg-secondary"
             >
-              <div className="flex items-center justify-between w-full">
-                <span className="font-medium">{city.name}</span>
-                <span className="text-xs text-muted-foreground ml-4">{city.region}</span>
-              </div>
+               <span className="font-medium">{city.name}</span>
             </SelectItem>
           ))}
         </SelectContent>
