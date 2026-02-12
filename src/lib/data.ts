@@ -275,3 +275,39 @@ export const contactHistory = [
   { id: "4", phone: "+21695444555", date: "2024-01-14T16:45:00", category: "plomberie" },
   { id: "5", phone: "+21694555666", date: "2024-01-13T11:20:00", category: "plomberie" },
 ];
+
+// Dynamic artisan management with localStorage
+const ARTISANS_STORAGE_KEY = "custom_artisans";
+
+export function getCustomArtisans(): Artisan[] {
+  try {
+    const stored = localStorage.getItem(ARTISANS_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomArtisans(artisans: Artisan[]) {
+  localStorage.setItem(ARTISANS_STORAGE_KEY, JSON.stringify(artisans));
+}
+
+export function getAllArtisans(): Artisan[] {
+  return [...mockArtisans, ...getCustomArtisans()];
+}
+
+export function addArtisan(artisan: Omit<Artisan, "id">): Artisan {
+  const custom = getCustomArtisans();
+  const newArtisan: Artisan = {
+    ...artisan,
+    id: `custom_${Date.now()}`,
+  };
+  custom.push(newArtisan);
+  saveCustomArtisans(custom);
+  return newArtisan;
+}
+
+export function deleteArtisan(id: string) {
+  const custom = getCustomArtisans().filter(a => a.id !== id);
+  saveCustomArtisans(custom);
+}

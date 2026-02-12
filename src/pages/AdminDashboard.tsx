@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, ArrowLeft, Phone, MessageCircle, Trash2, Search, Users, PhoneCall, MapPin, Calendar, ArrowRight } from "lucide-react";
+import { Shield, ArrowLeft, Phone, MessageCircle, Trash2, Search, Users, PhoneCall, MapPin, Calendar, ArrowRight, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getContactLog, clearContactLog, ContactLogEntry } from "@/lib/contactLog";
-import { categories, cities } from "@/lib/data";
+import { categories, cities, getAllArtisans } from "@/lib/data";
+import { AddArtisanDialog } from "@/components/AddArtisanDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -18,6 +19,7 @@ const AdminDashboard = () => {
   const [pinError, setPinError] = useState("");
   const [logs, setLogs] = useState<ContactLogEntry[]>([]);
   const [search, setSearch] = useState("");
+  const [, setRefresh] = useState(0);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -107,10 +109,13 @@ const AdminDashboard = () => {
               <p className="text-xs text-muted-foreground">Journal des contacts</p>
             </div>
           </div>
-          <Button variant="outline" onClick={() => navigate("/")} size="sm">
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            Retour
-          </Button>
+          <div className="flex items-center gap-2">
+            <AddArtisanDialog onArtisanAdded={() => setRefresh(r => r + 1)} />
+            <Button variant="outline" onClick={() => navigate("/")} size="sm">
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Retour
+            </Button>
+          </div>
         </div>
       </header>
 
