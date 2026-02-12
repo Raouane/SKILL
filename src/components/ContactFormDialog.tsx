@@ -145,7 +145,7 @@ export function ContactFormDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && resetAndClose()}>
-      <DialogContent className="sm:max-w-md mx-4 rounded-2xl">
+      <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-2xl p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             {contactMethod === "whatsapp" ? (
