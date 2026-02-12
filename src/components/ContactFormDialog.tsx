@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Phone, MessageCircle, User, Smartphone } from "lucide-react";
+import { Phone, MessageCircle, User, Smartphone, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,8 +28,25 @@ export function ContactFormDialog({
 }: ContactFormDialogProps) {
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+216");
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const countryCodes = [
+    { code: "+216", flag: "🇹🇳", label: "Tunisie" },
+    { code: "+33", flag: "🇫🇷", label: "France" },
+    { code: "+212", flag: "🇲🇦", label: "Maroc" },
+    { code: "+213", flag: "🇩🇿", label: "Algérie" },
+    { code: "+218", flag: "🇱🇾", label: "Libye" },
+    { code: "+39", flag: "🇮🇹", label: "Italie" },
+    { code: "+49", flag: "🇩🇪", label: "Allemagne" },
+    { code: "+44", flag: "🇬🇧", label: "UK" },
+    { code: "+1", flag: "🇺🇸", label: "USA" },
+    { code: "+966", flag: "🇸🇦", label: "Arabie S." },
+    { code: "+971", flag: "🇦🇪", label: "EAU" },
+    { code: "+974", flag: "🇶🇦", label: "Qatar" },
+  ];
 
   const validateForm = () => {
     const newErrors: { name?: string; phone?: string } = {};
@@ -42,14 +59,12 @@ export function ContactFormDialog({
       newErrors.name = "Le nom ne peut pas dépasser 50 caractères";
     }
     
-    // Tunisian phone number validation (8 digits, starting with 2, 5, 9)
-    const phoneRegex = /^[259]\d{7}$/;
     const cleanPhone = clientPhone.replace(/\s/g, "");
     
     if (!cleanPhone) {
       newErrors.phone = "Veuillez entrer votre numéro";
-    } else if (!phoneRegex.test(cleanPhone)) {
-      newErrors.phone = "Numéro invalide (ex: 98 123 456)";
+    } else if (cleanPhone.length < 6 || cleanPhone.length > 15 || !/^\d+$/.test(cleanPhone)) {
+      newErrors.phone = "Numéro invalide (6 à 15 chiffres)";
     }
     
     setErrors(newErrors);
@@ -62,7 +77,7 @@ export function ContactFormDialog({
     setIsSubmitting(true);
     
     const cleanPhone = clientPhone.replace(/\s/g, "");
-    const fullPhone = `+216${cleanPhone}`;
+    const fullPhone = `${countryCode}${cleanPhone}`;
     
     // Log the contact
     const logEntry = {
@@ -125,22 +140,16 @@ export function ContactFormDialog({
   const resetAndClose = () => {
     setClientName("");
     setClientPhone("");
+    setCountryCode("+216");
+    setShowCountryPicker(false);
     setErrors({});
     setIsSubmitting(false);
     onClose();
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only allow numbers and format as XX XXX XXX
-    const value = e.target.value.replace(/\D/g, "").slice(0, 8);
-    let formatted = value;
-    if (value.length > 2) {
-      formatted = `${value.slice(0, 2)} ${value.slice(2)}`;
-    }
-    if (value.length > 5) {
-      formatted = `${value.slice(0, 2)} ${value.slice(2, 5)} ${value.slice(5)}`;
-    }
-    setClientPhone(formatted);
+    const value = e.target.value.replace(/\D/g, "").slice(0, 15);
+    setClientPhone(value);
   };
 
   return (
@@ -187,13 +196,40 @@ export function ContactFormDialog({
               Votre numéro
             </Label>
             <div className="flex gap-2">
-              <div className="flex items-center px-3 bg-muted rounded-md border border-input text-sm font-medium">
-                +216
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowCountryPicker(!showCountryPicker)}
+                  className="flex items-center gap-1 px-2 h-10 bg-muted rounded-md border border-input text-sm font-medium hover:bg-muted/80 transition-colors"
+                >
+                  <span>{countryCodes.find(c => c.code === countryCode)?.flag}</span>
+                  <span className="text-xs">{countryCode}</span>
+                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                </button>
+                {showCountryPicker && (
+                  <div className="absolute top-11 left-0 z-50 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto w-52">
+                    {countryCodes.map((c) => (
+                      <button
+                        key={c.code}
+                        type="button"
+                        className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-muted transition-colors text-left"
+                        onClick={() => {
+                          setCountryCode(c.code);
+                          setShowCountryPicker(false);
+                        }}
+                      >
+                        <span>{c.flag}</span>
+                        <span className="font-medium">{c.code}</span>
+                        <span className="text-muted-foreground">{c.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <Input
                 id="clientPhone"
                 type="tel"
-                placeholder="98 123 456"
+                placeholder="Votre numéro"
                 value={clientPhone}
                 onChange={handlePhoneChange}
                 className={`flex-1 ${errors.phone ? "border-destructive" : ""}`}
