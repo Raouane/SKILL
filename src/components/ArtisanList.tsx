@@ -1,7 +1,7 @@
 import { ArrowLeft, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArtisanCard } from "@/components/ArtisanCard";
-import { Artisan, categories, mockArtisans } from "@/lib/data";
+import { Artisan, categories, getAllArtisans } from "@/lib/data";
 
 interface ArtisanListProps {
   cityId: string;
@@ -14,7 +14,7 @@ export function ArtisanList({ cityId, categoryId, onBack, onContact }: ArtisanLi
   const category = categories.find(c => c.id === categoryId);
   
   // Filter artisans by city, category, and online status (balance > 0)
-  const artisans = mockArtisans.filter(
+  const artisans = getAllArtisans().filter(
     a => a.city === cityId && 
          a.category === categoryId && 
          a.isOnline && 
