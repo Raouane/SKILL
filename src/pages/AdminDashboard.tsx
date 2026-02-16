@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, ArrowLeft, Phone, MessageCircle, Trash2, Search, Users, PhoneCall, MapPin, Calendar, ArrowRight, Coins } from "lucide-react";
+import { Shield, ArrowLeft, Phone, MessageCircle, Trash2, Search, Users, PhoneCall, MapPin, Calendar, ArrowRight, Coins, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getContactLog, clearContactLog, ContactLogEntry } from "@/lib/contactLog";
-import { categories, cities, getAllArtisans } from "@/lib/data";
+import { categories, cities, getAllArtisans, deleteArtisan, Artisan } from "@/lib/data";
 import { AddArtisanDialog } from "@/components/AddArtisanDialog";
+import { EditArtisanDialog } from "@/components/EditArtisanDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { toast } from "sonner";
 
 const ADMIN_PIN = "1234";
 
@@ -19,13 +22,18 @@ const AdminDashboard = () => {
   const [pinError, setPinError] = useState("");
   const [logs, setLogs] = useState<ContactLogEntry[]>([]);
   const [search, setSearch] = useState("");
-  const [, setRefresh] = useState(0);
+  const [proSearch, setProSearch] = useState("");
+  const [artisans, setArtisans] = useState<Artisan[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refresh = () => setRefreshKey(r => r + 1);
 
   useEffect(() => {
     if (isAuthenticated) {
       setLogs(getContactLog());
+      setArtisans(getAllArtisans());
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, refreshKey]);
 
   const handleLogin = () => {
     if (pin === ADMIN_PIN) {
@@ -43,6 +51,14 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteArtisan = (artisan: Artisan) => {
+    if (window.confirm(`Supprimer ${artisan.name} ?`)) {
+      deleteArtisan(artisan.id);
+      toast.success(`${artisan.name} supprimé`);
+      refresh();
+    }
+  };
+
   const getCategoryName = (id: string) =>
     categories.find((c) => c.id === id)?.name || id;
 
@@ -56,6 +72,16 @@ const AdminDashboard = () => {
       log.clientPhone.includes(q) ||
       log.artisanName.toLowerCase().includes(q) ||
       log.artisanPhone.includes(q)
+    );
+  });
+
+  const filteredArtisans = artisans.filter((a) => {
+    const q = proSearch.toLowerCase();
+    return (
+      a.name.toLowerCase().includes(q) ||
+      a.phone.includes(q) ||
+      getCategoryName(a.category).toLowerCase().includes(q) ||
+      getCityName(a.city).toLowerCase().includes(q)
     );
   });
 
@@ -106,133 +132,220 @@ const AdminDashboard = () => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">Admin Dashboard</h1>
-              <p className="text-xs text-muted-foreground">Journal des contacts</p>
+              <p className="text-xs text-muted-foreground">Gestion complète</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <AddArtisanDialog onArtisanAdded={() => setRefresh(r => r + 1)} />
-            <Button variant="outline" onClick={() => navigate("/")} size="sm">
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Retour
-            </Button>
-          </div>
+          <Button variant="outline" onClick={() => navigate("/")} size="sm">
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Retour
+          </Button>
         </div>
       </header>
 
-      <main className="container py-6 space-y-6">
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-card rounded-xl p-4 shadow-card border border-border">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <Users className="w-4 h-4" />
-              <span className="text-xs font-medium">Total</span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{logs.length}</p>
-          </div>
-          <div className="bg-card rounded-xl p-4 shadow-card border border-border">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <PhoneCall className="w-4 h-4" />
-              <span className="text-xs font-medium">Appels</span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{totalCalls}</p>
-          </div>
-          <div className="bg-card rounded-xl p-4 shadow-card border border-border">
-            <div className="flex items-center gap-2 text-[hsl(var(--whatsapp))]  mb-1">
-              <MessageCircle className="w-4 h-4" />
-              <span className="text-xs font-medium">WhatsApp</span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{totalWhatsapp}</p>
-          </div>
-        </div>
+      <main className="container py-6">
+        <Tabs defaultValue="pros" className="space-y-6">
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="pros" className="flex items-center gap-2">
+              <UserCog className="w-4 h-4" />
+              Professionnels
+            </TabsTrigger>
+            <TabsTrigger value="contacts" className="flex items-center gap-2">
+              <Phone className="w-4 h-4" />
+              Contacts
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Search + Clear */}
-        <div className="flex gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher par nom ou numéro..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          {logs.length > 0 && (
-            <Button variant="outline" size="icon" onClick={handleClear} className="text-destructive hover:text-destructive">
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
-
-        {/* Cards */}
-        {filteredLogs.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p className="font-medium">Aucun contact enregistré</p>
-            <p className="text-sm">Les mises en relation apparaîtront ici</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredLogs.map((log) => (
-              <div key={log.id} className="bg-card rounded-xl border border-border shadow-card p-4 space-y-3">
-                {/* Date + Method badge */}
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {format(new Date(log.date), "dd/MM/yy à HH:mm", { locale: fr })}
-                  </span>
-                  {log.method === "whatsapp" ? (
-                    <Badge className="bg-[hsl(var(--whatsapp))] text-[hsl(var(--whatsapp-foreground))] text-xs">
-                      <MessageCircle className="w-3 h-3 mr-1" />
-                      WhatsApp
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-primary text-primary-foreground text-xs">
-                      <Phone className="w-3 h-3 mr-1" />
-                      Appel
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Client → Artisan */}
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 bg-secondary/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground mb-0.5">Client</p>
-                    <p className="font-semibold text-sm">{log.clientName}</p>
-                    <p className="text-xs text-muted-foreground">{log.clientPhone}</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <div className="flex-1 bg-secondary/50 rounded-lg p-3">
-                    <p className="text-xs text-muted-foreground mb-0.5">Artisan</p>
-                    <p className="font-semibold text-sm">{log.artisanName}</p>
-                    <p className="text-xs text-muted-foreground">{log.artisanPhone}</p>
-                  </div>
-                </div>
-
-                {/* Category + City + Location */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="secondary" className="text-xs">
-                    {getCategoryName(log.category)}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    <MapPin className="w-3 h-3 mr-1" />
-                    {getCityName(log.city)}
-                  </Badge>
-                  {log.clientLocation && (
-                    <a
-                      href={log.clientLocation}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-primary hover:underline flex items-center gap-1"
-                    >
-                      <MapPin className="w-3 h-3" />
-                      Voir position
-                    </a>
-                  )}
-                </div>
+          {/* === TAB PROS === */}
+          <TabsContent value="pros" className="space-y-4">
+            {/* Search + Add */}
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher un pro..."
+                  value={proSearch}
+                  onChange={(e) => setProSearch(e.target.value)}
+                  className="pl-9"
+                />
               </div>
-            ))}
-          </div>
-        )}
+              <AddArtisanDialog onArtisanAdded={refresh} />
+            </div>
+
+            {/* Stats */}
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Users className="w-4 h-4" />
+                {filteredArtisans.length} pro{filteredArtisans.length > 1 ? "s" : ""}
+              </span>
+              <span className="flex items-center gap-1">
+                <Coins className="w-4 h-4" />
+                Total solde : {filteredArtisans.reduce((s, a) => s + a.balance, 0)} DNT
+              </span>
+            </div>
+
+            {/* Pro Cards */}
+            {filteredArtisans.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p className="font-medium">Aucun professionnel trouvé</p>
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredArtisans.map((artisan) => (
+                  <div key={artisan.id} className="bg-card rounded-xl border border-border shadow-card p-4 space-y-3">
+                    {/* Top: name + actions */}
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-foreground truncate">{artisan.name}</p>
+                        <p className="text-xs text-muted-foreground">{artisan.phone}</p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <EditArtisanDialog artisan={artisan} onArtisanUpdated={refresh} />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-destructive"
+                          onClick={() => handleDeleteArtisan(artisan)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Badges */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="secondary" className="text-xs">
+                        {getCategoryName(artisan.category)}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {getCityName(artisan.city)}
+                      </Badge>
+                    </div>
+
+                    {/* Balance + Status */}
+                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                      <div className="flex items-center gap-1.5">
+                        <Coins className="w-4 h-4 text-primary" />
+                        <span className={`text-sm font-bold ${artisan.balance < 5 ? "text-destructive" : "text-foreground"}`}>
+                          {artisan.balance} DNT
+                        </span>
+                      </div>
+                      <Badge variant={artisan.isOnline ? "default" : "secondary"} className="text-xs">
+                        {artisan.isOnline ? "En ligne" : "Hors-ligne"}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* === TAB CONTACTS === */}
+          <TabsContent value="contacts" className="space-y-6">
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-card rounded-xl p-4 shadow-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <Users className="w-4 h-4" />
+                  <span className="text-xs font-medium">Total</span>
+                </div>
+                <p className="text-2xl font-bold text-foreground">{logs.length}</p>
+              </div>
+              <div className="bg-card rounded-xl p-4 shadow-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                  <PhoneCall className="w-4 h-4" />
+                  <span className="text-xs font-medium">Appels</span>
+                </div>
+                <p className="text-2xl font-bold text-foreground">{totalCalls}</p>
+              </div>
+              <div className="bg-card rounded-xl p-4 shadow-card border border-border">
+                <div className="flex items-center gap-2 text-[hsl(var(--whatsapp))] mb-1">
+                  <MessageCircle className="w-4 h-4" />
+                  <span className="text-xs font-medium">WhatsApp</span>
+                </div>
+                <p className="text-2xl font-bold text-foreground">{totalWhatsapp}</p>
+              </div>
+            </div>
+
+            {/* Search + Clear */}
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher par nom ou numéro..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              {logs.length > 0 && (
+                <Button variant="outline" size="icon" onClick={handleClear} className="text-destructive hover:text-destructive">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+
+            {/* Contact Cards */}
+            {filteredLogs.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p className="font-medium">Aucun contact enregistré</p>
+                <p className="text-sm">Les mises en relation apparaîtront ici</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredLogs.map((log) => (
+                  <div key={log.id} className="bg-card rounded-xl border border-border shadow-card p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {format(new Date(log.date), "dd/MM/yy à HH:mm", { locale: fr })}
+                      </span>
+                      {log.method === "whatsapp" ? (
+                        <Badge className="bg-[hsl(var(--whatsapp))] text-[hsl(var(--whatsapp-foreground))] text-xs">
+                          <MessageCircle className="w-3 h-3 mr-1" />
+                          WhatsApp
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-primary text-primary-foreground text-xs">
+                          <Phone className="w-3 h-3 mr-1" />
+                          Appel
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 bg-secondary/50 rounded-lg p-3">
+                        <p className="text-xs text-muted-foreground mb-0.5">Client</p>
+                        <p className="font-semibold text-sm">{log.clientName}</p>
+                        <p className="text-xs text-muted-foreground">{log.clientPhone}</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <div className="flex-1 bg-secondary/50 rounded-lg p-3">
+                        <p className="text-xs text-muted-foreground mb-0.5">Artisan</p>
+                        <p className="font-semibold text-sm">{log.artisanName}</p>
+                        <p className="text-xs text-muted-foreground">{log.artisanPhone}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge variant="secondary" className="text-xs">{getCategoryName(log.category)}</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {getCityName(log.city)}
+                      </Badge>
+                      {log.clientLocation && (
+                        <a href={log.clientLocation} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          Voir position
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

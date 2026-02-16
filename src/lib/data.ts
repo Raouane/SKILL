@@ -293,7 +293,12 @@ function saveCustomArtisans(artisans: Artisan[]) {
 }
 
 export function getAllArtisans(): Artisan[] {
-  return [...mockArtisans, ...getCustomArtisans()];
+  const deletedIds = getDeletedMockIds();
+  const overrides = getMockOverrides();
+  const mocks = mockArtisans
+    .filter(a => !deletedIds.includes(a.id))
+    .map(a => overrides[a.id] ? { ...a, ...overrides[a.id] } : a);
+  return [...mocks, ...getCustomArtisans()];
 }
 
 export function addArtisan(artisan: Omit<Artisan, "id">): Artisan {
@@ -308,6 +313,47 @@ export function addArtisan(artisan: Omit<Artisan, "id">): Artisan {
 }
 
 export function deleteArtisan(id: string) {
-  const custom = getCustomArtisans().filter(a => a.id !== id);
-  saveCustomArtisans(custom);
+  // For mock artisans, store deletion in localStorage
+  if (!id.startsWith("custom_")) {
+    const deleted = getDeletedMockIds();
+    deleted.push(id);
+    localStorage.setItem(DELETED_MOCK_KEY, JSON.stringify(deleted));
+  } else {
+    const custom = getCustomArtisans().filter(a => a.id !== id);
+    saveCustomArtisans(custom);
+  }
+}
+
+const DELETED_MOCK_KEY = "deleted_mock_artisans";
+
+function getDeletedMockIds(): string[] {
+  try {
+    const stored = localStorage.getItem(DELETED_MOCK_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function updateArtisan(id: string, updates: Partial<Omit<Artisan, "id">>): void {
+  if (id.startsWith("custom_")) {
+    const custom = getCustomArtisans().map(a => a.id === id ? { ...a, ...updates } : a);
+    saveCustomArtisans(custom);
+  } else {
+    // Store updates for mock artisans
+    const overrides = getMockOverrides();
+    overrides[id] = { ...(overrides[id] || {}), ...updates };
+    localStorage.setItem(MOCK_OVERRIDES_KEY, JSON.stringify(overrides));
+  }
+}
+
+const MOCK_OVERRIDES_KEY = "mock_artisan_overrides";
+
+function getMockOverrides(): Record<string, Partial<Artisan>> {
+  try {
+    const stored = localStorage.getItem(MOCK_OVERRIDES_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
 }
