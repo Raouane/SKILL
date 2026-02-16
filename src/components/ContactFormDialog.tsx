@@ -1,8 +1,15 @@
 import { useState } from "react";
-import { Phone, MessageCircle, User, Smartphone, ChevronDown } from "lucide-react";
+import { Phone, MessageCircle, User, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +36,6 @@ export function ContactFormDialog({
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+216");
-  const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [errors, setErrors] = useState<{ name?: string; phone?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -141,7 +147,7 @@ export function ContactFormDialog({
     setClientName("");
     setClientPhone("");
     setCountryCode("+216");
-    setShowCountryPicker(false);
+    setErrors({});
     setErrors({});
     setIsSubmitting(false);
     onClose();
@@ -196,36 +202,27 @@ export function ContactFormDialog({
               Votre numéro
             </Label>
             <div className="flex gap-2">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowCountryPicker(!showCountryPicker)}
-                  className="flex items-center gap-1 px-2 h-10 bg-muted rounded-md border border-input text-sm font-medium hover:bg-muted/80 transition-colors"
-                >
-                  <span>{countryCodes.find(c => c.code === countryCode)?.flag}</span>
-                  <span className="text-xs">{countryCode}</span>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
-                </button>
-                {showCountryPicker && (
-                  <div className="absolute top-11 left-0 z-50 bg-background border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto w-52">
-                    {countryCodes.map((c) => (
-                      <button
-                        key={c.code}
-                        type="button"
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-muted transition-colors text-left"
-                        onClick={() => {
-                          setCountryCode(c.code);
-                          setShowCountryPicker(false);
-                        }}
-                      >
+              <Select value={countryCode} onValueChange={setCountryCode}>
+                <SelectTrigger className="w-[100px] h-10">
+                  <SelectValue>
+                    <span className="flex items-center gap-1">
+                      <span>{countryCodes.find(c => c.code === countryCode)?.flag}</span>
+                      <span className="text-xs">{countryCode}</span>
+                    </span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="z-[200] bg-background">
+                  {countryCodes.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>
+                      <span className="flex items-center gap-2">
                         <span>{c.flag}</span>
                         <span className="font-medium">{c.code}</span>
                         <span className="text-muted-foreground">{c.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Input
                 id="clientPhone"
                 type="tel"
