@@ -1,20 +1,23 @@
 import { categories } from "@/lib/data";
 import { Button } from "@/components/ui/button";
-import { LucideIcon } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface CategoryGridProps {
   onCategorySelect: (categoryId: string) => void;
 }
 
 export function CategoryGrid({ onCategorySelect }: CategoryGridProps) {
+  const { t } = useI18n();
+
   return (
     <div className="animate-slide-up">
       <h2 className="text-lg font-bold text-foreground mb-4">
-        De quoi avez-vous besoin ?
+        {t("categories.title")}
       </h2>
       <div className="grid grid-cols-2 gap-3">
         {categories.map((category, index) => {
           const Icon = category.icon;
+          const translationKey = `cat.${category.id}` as any;
           return (
             <Button
               key={category.id}
@@ -36,7 +39,7 @@ export function CategoryGrid({ onCategorySelect }: CategoryGridProps) {
                 />
               </div>
               <span className="text-sm font-semibold text-foreground">
-                {category.name}
+                {t(translationKey)}
               </span>
             </Button>
           );

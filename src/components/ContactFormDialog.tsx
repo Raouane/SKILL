@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Artisan } from "@/lib/data";
 import { addContactLog } from "@/lib/contactLog";
+import { useI18n } from "@/lib/i18n";
 
 interface ContactFormDialogProps {
   artisan: Artisan | null;
@@ -33,6 +34,7 @@ export function ContactFormDialog({
   onClose, 
   contactMethod 
 }: ContactFormDialogProps) {
+  const { t } = useI18n();
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+216");
@@ -58,19 +60,19 @@ export function ContactFormDialog({
     const newErrors: { name?: string; phone?: string } = {};
     
     if (!clientName.trim()) {
-      newErrors.name = "Veuillez entrer votre nom";
+      newErrors.name = t("contact.error.name");
     } else if (clientName.trim().length < 2) {
-      newErrors.name = "Le nom doit contenir au moins 2 caractères";
+      newErrors.name = t("contact.error.nameMin");
     } else if (clientName.trim().length > 50) {
-      newErrors.name = "Le nom ne peut pas dépasser 50 caractères";
+      newErrors.name = t("contact.error.nameMax");
     }
     
     const cleanPhone = clientPhone.replace(/\s/g, "");
     
     if (!cleanPhone) {
-      newErrors.phone = "Veuillez entrer votre numéro";
+      newErrors.phone = t("contact.error.phone");
     } else if (cleanPhone.length < 6 || cleanPhone.length > 15 || !/^\d+$/.test(cleanPhone)) {
-      newErrors.phone = "Numéro invalide (6 à 15 chiffres)";
+      newErrors.phone = t("contact.error.phoneInvalid");
     }
     
     setErrors(newErrors);
@@ -85,7 +87,6 @@ export function ContactFormDialog({
     const cleanPhone = clientPhone.replace(/\s/g, "");
     const fullPhone = `${countryCode}${cleanPhone}`;
     
-    // Log the contact
     const logEntry = {
       clientName: clientName.trim(),
       clientPhone: fullPhone,
@@ -105,7 +106,12 @@ export function ContactFormDialog({
             const mapLink = `https://maps.google.com/?q=${latitude},${longitude}`;
             addContactLog({ ...logEntry, clientLocation: mapLink });
             const message = encodeURIComponent(
-              `Bonjour ${artisan.name}, je suis ${clientName.trim()} (${fullPhone}). J'ai besoin de vos services. Ma position: ${mapLink}`
+              t("whatsapp.messageWithLocation", {
+                name: artisan.name,
+                clientName: clientName.trim(),
+                phone: fullPhone,
+                location: mapLink,
+              })
             );
             window.open(
               `https://wa.me/${artisan.whatsapp.replace('+', '')}?text=${message}`,
@@ -116,7 +122,11 @@ export function ContactFormDialog({
           () => {
             addContactLog(logEntry);
             const message = encodeURIComponent(
-              `Bonjour ${artisan.name}, je suis ${clientName.trim()} (${fullPhone}). J'ai besoin de vos services.`
+              t("whatsapp.message", {
+                name: artisan.name,
+                clientName: clientName.trim(),
+                phone: fullPhone,
+              })
             );
             window.open(
               `https://wa.me/${artisan.whatsapp.replace('+', '')}?text=${message}`,
@@ -128,7 +138,11 @@ export function ContactFormDialog({
       } else {
         addContactLog(logEntry);
         const message = encodeURIComponent(
-          `Bonjour ${artisan.name}, je suis ${clientName.trim()} (${fullPhone}). J'ai besoin de vos services.`
+          t("whatsapp.message", {
+            name: artisan.name,
+            clientName: clientName.trim(),
+            phone: fullPhone,
+          })
         );
         window.open(
           `https://wa.me/${artisan.whatsapp.replace('+', '')}?text=${message}`,
@@ -147,7 +161,6 @@ export function ContactFormDialog({
     setClientName("");
     setClientPhone("");
     setCountryCode("+216");
-    setErrors({});
     setErrors({});
     setIsSubmitting(false);
     onClose();
@@ -168,23 +181,22 @@ export function ContactFormDialog({
             ) : (
               <Phone className="w-6 h-6 text-primary" />
             )}
-            Contacter {artisan?.name}
+            {t("contact.title")} {artisan?.name}
           </DialogTitle>
           <DialogDescription>
-            Entrez vos informations pour contacter l'artisan
+            {t("contact.subtitle")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Client Name */}
           <div className="space-y-2">
             <Label htmlFor="clientName" className="flex items-center gap-2">
               <User className="w-4 h-4" />
-              Votre nom
+              {t("contact.name")}
             </Label>
             <Input
               id="clientName"
-              placeholder="Ex: Ahmed Ben Salah"
+              placeholder={t("contact.namePlaceholder")}
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               className={errors.name ? "border-destructive" : ""}
@@ -195,11 +207,10 @@ export function ContactFormDialog({
             )}
           </div>
 
-          {/* Client Phone */}
           <div className="space-y-2">
             <Label htmlFor="clientPhone" className="flex items-center gap-2">
               <Smartphone className="w-4 h-4" />
-              Votre numéro
+              {t("contact.phone")}
             </Label>
             <div className="flex gap-2">
               <Select value={countryCode} onValueChange={setCountryCode}>
@@ -226,7 +237,7 @@ export function ContactFormDialog({
               <Input
                 id="clientPhone"
                 type="tel"
-                placeholder="Votre numéro"
+                placeholder={t("contact.phonePlaceholder")}
                 value={clientPhone}
                 onChange={handlePhoneChange}
                 className={`flex-1 ${errors.phone ? "border-destructive" : ""}`}
@@ -238,14 +249,13 @@ export function ContactFormDialog({
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex gap-3">
           <Button
             variant="outline"
             onClick={resetAndClose}
             className="flex-1"
           >
-            Annuler
+            {t("contact.cancel")}
           </Button>
           <Button
             variant={contactMethod === "whatsapp" ? "whatsapp" : "call"}
@@ -256,12 +266,12 @@ export function ContactFormDialog({
             {contactMethod === "whatsapp" ? (
               <>
                 <MessageCircle className="w-5 h-5" />
-                WhatsApp
+                {t("artisan.whatsapp")}
               </>
             ) : (
               <>
                 <Phone className="w-5 h-5" />
-                Appeler
+                {t("artisan.call")}
               </>
             )}
           </Button>

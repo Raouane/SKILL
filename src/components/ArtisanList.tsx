@@ -2,6 +2,7 @@ import { ArrowLeft, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArtisanCard } from "@/components/ArtisanCard";
 import { Artisan, categories, getAllArtisans } from "@/lib/data";
+import { useI18n } from "@/lib/i18n";
 
 interface ArtisanListProps {
   cityId: string;
@@ -11,9 +12,10 @@ interface ArtisanListProps {
 }
 
 export function ArtisanList({ cityId, categoryId, onBack, onContact }: ArtisanListProps) {
+  const { t } = useI18n();
   const category = categories.find(c => c.id === categoryId);
+  const translationKey = `cat.${categoryId}` as any;
   
-  // Filter artisans by city, category, and online status (balance > 0)
   const artisans = getAllArtisans().filter(
     a => a.city === cityId && 
          a.category === categoryId && 
@@ -23,7 +25,6 @@ export function ArtisanList({ cityId, categoryId, onBack, onContact }: ArtisanLi
 
   return (
     <div className="animate-fade-in">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Button 
           variant="ghost" 
@@ -35,15 +36,14 @@ export function ArtisanList({ cityId, categoryId, onBack, onContact }: ArtisanLi
         </Button>
         <div>
           <h1 className="text-xl font-bold text-foreground">
-            {category?.name}
+            {t(translationKey)}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {artisans.length} artisan{artisans.length !== 1 ? 's' : ''} disponible{artisans.length !== 1 ? 's' : ''}
+            {artisans.length} {t("artisans.available")}
           </p>
         </div>
       </div>
 
-      {/* Artisan list */}
       {artisans.length > 0 ? (
         <div className="space-y-3">
           {artisans.map((artisan, index) => (
@@ -68,10 +68,10 @@ export function ArtisanList({ cityId, categoryId, onBack, onContact }: ArtisanLi
             <Users className="w-8 h-8 text-muted-foreground" />
           </div>
           <h3 className="font-semibold text-foreground mb-2">
-            Aucun artisan disponible
+            {t("artisans.none.title")}
           </h3>
           <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-            Il n'y a pas d'artisans en ligne dans cette catégorie pour le moment. Réessayez plus tard.
+            {t("artisans.none.text")}
           </p>
         </div>
       )}
