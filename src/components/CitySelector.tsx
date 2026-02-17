@@ -1,5 +1,6 @@
-import { MapPin, ChevronDown } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { cities } from "@/lib/data";
+import { useI18n } from "@/lib/i18n";
 import {
   Select,
   SelectContent,
@@ -14,6 +15,7 @@ interface CitySelectorProps {
 }
 
 export function CitySelector({ selectedCity, onCityChange }: CitySelectorProps) {
+  const { t } = useI18n();
   const currentCity = cities.find(c => c.id === selectedCity);
 
   return (
@@ -24,11 +26,11 @@ export function CitySelector({ selectedCity, onCityChange }: CitySelectorProps) 
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <MapPin className="w-5 h-5 text-primary" />
             </div>
-            <SelectValue placeholder="Choisir votre ville">
+            <SelectValue placeholder={t("city.placeholder")}>
               {currentCity ? (
                 <span className="text-foreground">{currentCity.name}</span>
               ) : (
-                <span className="text-muted-foreground">Choisir votre ville</span>
+                <span className="text-muted-foreground">{t("city.placeholder")}</span>
               )}
             </SelectValue>
           </div>

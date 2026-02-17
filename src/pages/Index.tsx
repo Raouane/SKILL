@@ -6,21 +6,21 @@ import { CategoryGrid } from "@/components/CategoryGrid";
 import { ArtisanList } from "@/components/ArtisanList";
 import { ContactFormDialog } from "@/components/ContactFormDialog";
 import { Artisan } from "@/lib/data";
+import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
 
 type View = "home" | "artisans";
 
 const Index = () => {
+  const { t } = useI18n();
   const [view, setView] = useState<View>("home");
   const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   
-  // Contact dialog state
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [selectedArtisan, setSelectedArtisan] = useState<Artisan | null>(null);
   const [contactMethod, setContactMethod] = useState<"call" | "whatsapp" | null>(null);
 
-  // Load saved city from localStorage
   useEffect(() => {
     const savedCity = localStorage.getItem("selectedCity");
     if (savedCity) {
@@ -28,7 +28,6 @@ const Index = () => {
     }
   }, []);
 
-  // Save city to localStorage
   const handleCityChange = (city: string) => {
     setSelectedCity(city);
     localStorage.setItem("selectedCity", city);
@@ -36,7 +35,7 @@ const Index = () => {
 
   const handleCategorySelect = (categoryId: string) => {
     if (!selectedCity) {
-      toast.error("Veuillez d'abord choisir votre ville");
+      toast.error(t("artisans.toast.selectCity"));
       return;
     }
     setSelectedCategory(categoryId);
@@ -49,7 +48,6 @@ const Index = () => {
   };
 
   const handleContact = (artisan: Artisan, method: "call" | "whatsapp") => {
-    // Open the contact form dialog
     setSelectedArtisan(artisan);
     setContactMethod(method);
     setContactDialogOpen(true);
@@ -68,28 +66,25 @@ const Index = () => {
       <main className="flex-1 container py-6">
         {view === "home" ? (
           <div className="space-y-8">
-            {/* City selector */}
             <CitySelector 
               selectedCity={selectedCity}
               onCityChange={handleCityChange}
             />
 
-            {/* Welcome message when no city selected */}
             {!selectedCity && (
               <div className="text-center py-8 animate-fade-in">
                 <div className="w-20 h-20 mx-auto mb-4 rounded-2xl gradient-warm flex items-center justify-center shadow-elevated">
                   <span className="text-4xl">👋</span>
                 </div>
                 <h2 className="text-xl font-bold text-foreground mb-2">
-                  Bienvenue !
+                  {t("welcome.title")}
                 </h2>
                 <p className="text-muted-foreground max-w-xs mx-auto">
-                  Commencez par choisir votre ville pour découvrir les artisans disponibles
+                  {t("welcome.text")}
                 </p>
               </div>
             )}
 
-            {/* Categories grid - shown after city selection */}
             {selectedCity && (
               <CategoryGrid onCategorySelect={handleCategorySelect} />
             )}
@@ -106,7 +101,6 @@ const Index = () => {
 
       <Footer />
 
-      {/* Contact Form Dialog */}
       <ContactFormDialog
         artisan={selectedArtisan}
         isOpen={contactDialogOpen}
